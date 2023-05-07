@@ -1,10 +1,6 @@
 #!bin/bash 
 
 # uplaod to github
-echo "$(pwd)"
-
-
-
 git add .
 read -p "Enter commit message: " commit
 if [ -z "$commit" ]; then
@@ -17,4 +13,4 @@ git push
 
 
 
-
+# upload to gitlab

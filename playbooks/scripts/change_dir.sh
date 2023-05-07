@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-cd "$1"
+cd "$1" 
+
 echo "Changed directory to $(pwd)"
 # if linux use bash if mac use zsh
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
