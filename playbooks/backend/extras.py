@@ -1,16 +1,12 @@
 import os
 import sys
-import argparse
-import configparser
 import datetime
 import traceback
-import subprocess
 
 
 
 __version__  = '0.0.1'
 __last_modification__ = '05-06-2023'
-__author__ = 'Christian Nii Lantey Golightly'
 
 project_directory = os.path.abspath(os.path.dirname(__file__))
 main_directory = os.path.dirname(os.path.dirname(project_directory))

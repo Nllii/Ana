@@ -1,20 +1,14 @@
 from paramiko import SSHClient, AutoAddPolicy
 from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
-
-# import time
 import os
 import re
-# from fabric2 import Connection, Config
-# from invoke import Responder
 import subprocess
 from playbooks.backend import extras
-import configparser
 import platform
 import socket
 import nmap
 import random
-import json
 import sys
 
 class cluster(object):
@@ -22,10 +16,6 @@ class cluster(object):
         self.ssh_key_path = os.path.expanduser("~/.ssh/id_rsa.pub")
         self.project_dir = extras.main_directory
         self.found_mothership = self.inventory(file=inventory,username='mothership')
-        
-        
-        
-
 
 
     def get_mac_address(self):
@@ -69,10 +59,12 @@ class cluster(object):
         return server_name
 
 
-    def scan_network(self,get_host='ubuntu',host_range='192.168.1.0/24'):
+    def scan_network(self,get_host='ubuntu',host_range='172.20.10.0/24'):
         """scan the network and find the ip address of the server
-        * get_host as an argument to find the ip address of the server
-        Default is ubuntu
+        * '192.168.1.0/24'
+        * '172.20.10.0/24' 
+        *  scan between rannge 172.20.10.1-50 || 192.168.1.1-100
+        *  get_host as an argument to find the ip address of the server names : ubuntu is the default host name
         """
         UBUNTU_LOCAL_IP = []
         try:
@@ -85,7 +77,10 @@ class cluster(object):
                 print("Please install nmap using 'brew install nmap'")
                 sys.exit(1)
                 
-        nm.scan(hosts=host_range, arguments='-n -sP -PE -PA21,23,80,3389')
+        # nm.scan(hosts=host_range, arguments='-n -sP -PE -PA21,23,80,3389')
+        
+        nm.scan(hosts='172.20.10.1-50', arguments='-n -sP -PE -PA21,23,80,3389')
+
         hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
         count = 0
         for host, status in hosts_list:
@@ -96,8 +91,8 @@ class cluster(object):
                 name = ''
             if get_host in name:
                 UBUNTU_LOCAL_IP.append(host)
-            if count == 5:
-                break
+            # if count == 5:
+            #     break
             print('{0}:{1}:{2}'.format(host, status, name))
             
         if UBUNTU_LOCAL_IP == []:
@@ -106,10 +101,9 @@ class cluster(object):
         return UBUNTU_LOCAL_IP
     
         
-        # connected = self.clusters()
 
 
-    def clusters(self,update_cluster=False,hosts='ubuntu'):
+    def clusters(self,hosts='ubuntu'):
         """
         This function will search for the following servers on the network:
         - Defualt hosts is called ubuntu
@@ -174,14 +168,19 @@ class cluster(object):
         ssh.close()
         print("SSH key added and password-based authentication disabled on remote server.")
 
-    def ansible(self,playbook=None,script=None):
+    def ansible(self,playbook=None,script=None,become_password=None):
         if script != None:
             print(extras.output(f"Running tasks {script} ",color='red'))
             subprocess.call(['bash', f'{self.project_dir}/playbooks/scripts/{script}.sh'])
             return True
-            
-        # ansible-playbook -i  server playbooks/send_script.yml -e 'ansible_become_password=ch1ris23' -K -vvv
-        subprocess.run(['ansible-playbook', '-i', 'server.ini', f'playbooks/{playbook}.yml', '-e', 'ansible_become_password=ch1ris23', '-K', '-vvv'])
+        elif playbook != None:
+            if become_password == None:
+                print(extras.output(f"Running tasks {playbook} ",color='red'))
+                subprocess.run(['ansible-playbook', '-i', 'inventory.ini', f'playbooks/{playbook}.yml', '-K', '-vvv'])
+                return True
+            else:
+                subprocess.run(['ansible-playbook', '-i', 'inventory.ini', f'playbooks/{playbook}.yml', '-e', f'ansible_become_password={become_password}', '-K', '-vvv'])
+                return True
         
         
             

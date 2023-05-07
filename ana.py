@@ -1,12 +1,10 @@
 
 import os
 import sys
-import configparser
-import datetime
 from playbooks.backend import extras
 import argparse
 import subprocess
-import account
+# import account
 
 
 DEBUG = [True if '-d' in sys.argv else False][0]
@@ -17,8 +15,8 @@ def management():
     parser = argparse.ArgumentParser(description=f'v{__version__} Ana an assistant to help with the management of projects and tasks')
     parser.add_argument('-p','--path', action='store_true', help='show the path of the ana directory')
     parser.add_argument('-cd','--change_dir', action='store_true', help='show the path of the ana config file')
-    parser.add_argument('-d','--null', action='store_true', help='show the version of ana')
-    parser.add_argument('-push','--push', action='store_true', help='show the version of ana')
+    parser.add_argument('-d','--null', action='store_true')
+    parser.add_argument('-push','--push', action='store_true', help='push changes to git')
     # parser.add_argument('-i','--cluster', action='store_true', help='show the version of ana')
     args = parser.parse_args()
     if args.path:
@@ -31,7 +29,6 @@ def management():
     if args.push:
         subprocess.call(f'bash {extras.main_directory}/playbooks/scripts/git_push.sh {extras.main_directory}', shell=True)
         sys.exit(0)
-    # if args.cluster:
         
         
         
