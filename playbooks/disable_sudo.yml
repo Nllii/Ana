@@ -1,0 +1,12 @@
+- hosts: all
+  become: True
+  become_method: sudo
+  gather_facts: False
+  tasks:
+    - lineinfile:
+        path: /etc/sudoers
+        state: present
+        insertafter: '^%sudo'
+        line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+

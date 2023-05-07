@@ -9,7 +9,13 @@ Install
 ```pip install -e .```
 
 
+a mothership is required for this project every device on the network will report back to it
 
+``` 
+[main]
+mothership disable=true ansible_host=0 ansible_user=0 ansible_password=0 mac_address=0
+
+```
 
 
 
