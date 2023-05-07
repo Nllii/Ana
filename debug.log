@@ -1,0 +1,33 @@
+2023-05-06 19:35:03.647953:
+Traceback (most recent call last):
+  File "/Users/admin/miniconda3/bin/ana", line 33, in <module>
+    sys.exit(load_entry_point('Ana', 'console_scripts', 'ana')())
+  File "/Volumes/developer/development/ana/ana.py", line 22, in management
+    if args.path:
+AttributeError: 'Namespace' object has no attribute 'path'
+2023-05-06 19:35:49.388864:
+Traceback (most recent call last):
+  File "/Users/admin/miniconda3/bin/ana", line 33, in <module>
+    sys.exit(load_entry_point('Ana', 'console_scripts', 'ana')())
+  File "/Volumes/developer/development/ana/ana.py", line 22, in management
+    if args.path:
+AttributeError: 'Namespace' object has no attribute 'path'
+2023-05-06 19:54:16.062247:
+Traceback (most recent call last):
+  File "/Users/admin/miniconda3/bin/ana", line 33, in <module>
+    sys.exit(load_entry_point('Ana', 'console_scripts', 'ana')())
+  File "/Volumes/developer/development/ana/ana.py", line 21, in management
+    parser.add_argument('-vvv','--null', action='store_true', help='show the version of ana')
+  File "/Users/admin/miniconda3/lib/python3.10/argparse.py", line 1441, in add_argument
+    return self._add_action(action)
+  File "/Users/admin/miniconda3/lib/python3.10/argparse.py", line 1807, in _add_action
+    self._optionals._add_action(action)
+  File "/Users/admin/miniconda3/lib/python3.10/argparse.py", line 1643, in _add_action
+    action = super(_ArgumentGroup, self)._add_action(action)
+  File "/Users/admin/miniconda3/lib/python3.10/argparse.py", line 1455, in _add_action
+    self._check_conflict(action)
+  File "/Users/admin/miniconda3/lib/python3.10/argparse.py", line 1592, in _check_conflict
+    conflict_handler(action, confl_optionals)
+  File "/Users/admin/miniconda3/lib/python3.10/argparse.py", line 1601, in _handle_conflict_error
+    raise ArgumentError(action, message % conflict_string)
+argparse.ArgumentError: argument -vvv/--null: conflicting option string: --null
