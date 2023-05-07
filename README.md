@@ -9,3 +9,7 @@ Install
 ```pip install -e .```
 
 
+
+
+#TODO: 
+- auto add cluster names for devices discovered on the during scan to the inventory.ini file.
