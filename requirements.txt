@@ -1,4 +1,0 @@
-Ansible
-fabric2
-ansible_runner
-python-nmap
