@@ -10,12 +10,76 @@ import subprocess
 import re
 import sys
 import warnings
-init(autoreset=True)
-__all__ = ['log_exception']
+from backend import connection
+import requests
 
+init(autoreset=True)
+
+
+__all__ = ['log_exception']
 VERBOSE = [ sys.argv if '-v' in sys.argv else False][0]
 ANA_ROOT = os.path.abspath(os.path.dirname(__file__))
 UNIXSCRIPT_ROOT = os.path.abspath(os.path.dirname(__file__) + '/unix-scripts')
+
+
+
+
+class find_servers():
+    """finds servers on the network"""
+    def __init__(self,device_name=None):
+        if device_name is None:
+            self.devices_name = ['mac','linux','windows','raspberry','Raspberry Pi','ubuntu','debian','Apple']
+        else:
+            self.devices_name = device_name
+            
+    def servers(self):
+        """returns a list of servers on the network
+
+        Returns:
+            str: list
+        """
+        conn = connection.cluster()
+        devices = conn.scan_network()
+        found_devices = []
+        for information in devices:
+            for mac_address, vendor in information['vendor'].items():
+                for names in self.devices_name:
+                    if names in vendor:
+                        try:
+                            network_address = information['addresses']
+                            for version in network_address:
+                                device_address = network_address[version]
+                                found_devices.append(device_address)
+                                break
+                        except:
+                            pass
+                        
+        return found_devices
+    
+
+
+class send_data(find_servers):
+    """using rsync  to send files."""
+    def __init__(self,name,remote=None,local=None):
+        self.local_path = local
+        self.remote_path = remote
+        # self.name = device_name or name
+        super().__init__()
+        self._send_()
+    
+    def _send_(self):   
+        # use rsync to send files
+        if self.local_path is None:
+            self.local_path = os.getcwd()
+        if self.remote_path is None:
+            raise Exception ("- specify a remote path.")        
+        for server in self.servers():
+            print("Sending files to:", server)
+            print(self.remote_path)
+            files_ = subprocess.Popen(['rsync', '-avz', self.local_path, f'{self.name}@{server}' + ":" + self.remote_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(files_.stdout.read().decode('utf-8'))
+
+
 
 
 
@@ -74,7 +138,49 @@ class notification(object):
         return "Message sent successfully."
         """
         
+    def relay_message(self,message,endpoints='imessage',port=5020,local_server=''):
+        # list_servers = find_servers()
+        relay_url = []
+        if (local_server): #LOL python is weird awesome; 
+            conn = connection.cluster()
+            local_address = conn.local_address()
+            url = f'http://{local_address}:{port}/{endpoints}'  # Replace with the appropriate URL where your Flask server is running
+            relay_url.append(url)
+        elif (local_server is False):
+            servers = find_servers()
+            listed_servers = [found_server for found_server in servers.servers()]
+            for server in listed_servers:    
+                url = f'http://{server}:{port}/{endpoints}'
+                relay_url.append(url)
+        for message_url in relay_url:
+            try: 
+                code = '''
+                def multiply(a, b):
+                    return a * b
+
+                result = multiply(5, 10)
+                print(result)
+                '''  # Python code to be executed on the server
+                # command = 'ls -l'  # Command to be executed on the server
+                # payload = {'code': code}  # Data to be sent in the request's form data
+                payload = {'message': message}  # Data to be sent in the request's form data
+                response = requests.post(message_url, data=payload)
+                if response.status_code == 200:
+                    print(Fore.GREEN + "Message sent successfully." + Fore.RESET)
+                else:
+                    print(Fore.RED + "Error executing command. Server response:" + Fore.RESET)
+            except Exception as e:
+                continue
         
+        
+        
+        
+
+
+
+
+
+
 def log_exception(exctype, value, tb):
     """A function to log all unhandled exceptions to a file"""
     now = datetime.datetime.now()

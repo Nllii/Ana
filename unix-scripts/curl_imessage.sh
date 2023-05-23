@@ -15,10 +15,10 @@ alert(){
     RESPONSE_BODY="${RESPONSE:0:${#RESPONSE}-3}"
     if [ "$HTTP_STATUS" -eq 200 ]; then
         # Command executed successfully. Output:
-        echo "$RESPONSE_BODY" >> $LOG_FILE
+        echo "message successfully $alert_message" >> $LOG_FILE
     else
         # Error executing command. Server response:
-        echo "$RESPONSE_BODY" >> $LOG_FILE
+        echo "Error executing message $alert_message" >> $LOG_FILE
     fi
 }
 
