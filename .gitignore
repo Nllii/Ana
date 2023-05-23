@@ -2,3 +2,8 @@ Ana.egg-info
 __pycache__
 .account.ini
 .old_ana
+settings.py
+.server_url.txt
+.internet_connection.log
+debug.log
+*.plist
