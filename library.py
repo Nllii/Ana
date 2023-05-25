@@ -192,9 +192,11 @@ class send_data(find_servers):
         for server in self.servers():
             try:
                 notification().send_message(f" sending files to  server {server}   {self.name} from {self.local_path} to {self.remote_path}",disable_verbose=True)
-                # rsync -avz .server_url.txt ubuntu@172.20.10.7:/home/ubuntu
                 files_ = subprocess.Popen(['rsync', '-avz', self.local_path, f'{self.name}@{server}:{self.remote_path}'], stdout=subprocess.PIPE)
-                print(files_.stdout.read().decode('utf-8'))
+                files_.communicate() # Wait for the process to finish
+                
+                notification().send_message(f" files sent to  server {server}   {self.name} from {self.local_path} to {self.remote_path}",disable_verbose=True)
+                
                 
             except Exception as e:
                 # print(e)

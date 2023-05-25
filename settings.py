@@ -90,29 +90,21 @@ if send_files and send_files[1] == '-send':
     send_data(hostname=f"{send_files[send_files.index('-device') + 1]}",remote=remote,local=local)    
             
     
-# print(device_name,send_files[send_files.index('-f') + 1])
-
-    # if device_name == 'admin':
-        
-    #     send_data(name=f"{device_name}",remote="/Users/admin/Desktop/fucked")
-    # elif device_name == 'linux':
-        
-    #     send_data(name=f"{device_name}",remote="projects/library_tools")
 
 
 
-
-help_meun = """ 
-reset_server = [ sys.argv if '-reset' in sys.argv else False][0]
-message = [ sys.argv if '-m' in sys.argv else False][0]
-delete_phone_number = [ sys.argv if '-remove' in sys.argv else False][0]
-
-send_files = [ sys.argv if '-send' in sys.argv else False][0]
-    example : ana -send -r /home/ubuntu -local  ana  -device "ubuntu" 
-
-
+help_meun = """
+-reset: reset the server
+-m: send a message to the user
+-remove: remove the phone number from the environment variables
+-send: send files to the user
+    * example: python3 settings.py -send -device "iPhone" -r "/Users/username/Desktop" -local "/Users/username/Desktop file.txt"
+    * ana -send -device "iPhone" -r "/Users/username/Desktop" -local "/Users/username/Desktop file.txt"
+        ana -send -r /home/ubuntu -local  ana  -device "ubuntu" 
+-device: the device name to send files to
+-r: remote file path
+-local: local file path
 """
-
 
 
 
