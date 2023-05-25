@@ -17,7 +17,7 @@ setup(
     py_modules=['ana'],
     entry_points={
         'console_scripts': [
-            'ana=settings.py',
+            'ana=settings:_entry_point',
 
         ],
         
