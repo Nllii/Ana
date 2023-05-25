@@ -17,7 +17,7 @@ setup(
     py_modules=['ana'],
     entry_points={
         'console_scripts': [
-            'ana=ana:main',
+            'ana=settings.py',
 
         ],
         
@@ -26,7 +26,7 @@ setup(
     classifiers=[
         'Development Status :: 1 - Alpha',
         'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools'    ]
+        'Topic :: Software Development :: Build Tools']
 
 
 )

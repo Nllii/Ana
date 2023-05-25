@@ -7,3 +7,4 @@ settings.py
 .internet_connection.log
 debug.log
 *.plist
+function_test.py

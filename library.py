@@ -4,7 +4,7 @@
 import os
 import datetime
 import traceback
-import settings
+# import settings
 from colorama import Fore, Back, Style, init
 import subprocess
 import re
@@ -14,9 +14,9 @@ from backend import connection
 import requests
 
 init(autoreset=True)
+__all__ = ['log_exception','notification']
 
 
-__all__ = ['log_exception']
 VERBOSE = [ sys.argv if '-v' in sys.argv else False][0]
 ANA_ROOT = os.path.abspath(os.path.dirname(__file__))
 UNIXSCRIPT_ROOT = os.path.abspath(os.path.dirname(__file__) + '/unix-scripts')
@@ -53,7 +53,6 @@ class find_servers():
                                 break
                         except:
                             pass
-                        
         return found_devices
     
 
@@ -91,7 +90,9 @@ class notification(object):
         self.script = launchctl_script or f"{UNIXSCRIPT_ROOT}/launchctl_notification.sh"
         self.arg_options = options or "helloworld.py"
         self.f_args = f_args or "create_plist"
-        self.number = cell_number or settings.phone_number
+        # read the phone number from the environment variable
+        self.number = cell_number or os.environ.get('phone_number')
+        # self.number = cell_number or settings.phone_number
         
     def setup_launchctl(self):
         subprocess.call(['bash', self.script, self.f_args,self.arg_options])
@@ -138,10 +139,25 @@ class notification(object):
         return "Message sent successfully."
         """
         
-    def relay_message(self,message,endpoints='imessage',port=5020,local_server=''):
+    def relay_message(self,message,endpoints='imessage',port=5020,local_server=True):
+        
+        """ sends a message to a server on the network.
+        Example:
+        notification().relay_message([message[2] if message else "test_notification notification().relay_message"],endpoints='imessage',port=5020,local_server=True)
+        
+        Args:
+            message (str): "a message to send"
+            endpoints (str, optional): if you have a different endpoint to use for your message. Defaults to 'imessage'.
+            port (int, optional): what port is your server using for messaging. Defaults to 5020.
+            local_server (str, optional): if False, it scans LAN and sends out the message to every endpoint on your network. Defaults to True.
+
+        Returns:
+            _type_: _description_
+        """
+        
         # list_servers = find_servers()
         relay_url = []
-        if (local_server): #LOL python is weird awesome; 
+        if (local_server==True): #LOL python is weird awesome; 
             conn = connection.cluster()
             local_address = conn.local_address()
             url = f'http://{local_address}:{port}/{endpoints}'  # Replace with the appropriate URL where your Flask server is running
