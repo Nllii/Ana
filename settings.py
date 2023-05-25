@@ -2,7 +2,7 @@
 uses imessage.
 
 """
-from library import notification
+from library import notification,send_data
 import os
 import sys
 from colorama import Fore, Back, Style, init
@@ -12,6 +12,7 @@ init(autoreset=True)
 reset_server = [ sys.argv if '-reset' in sys.argv else False][0]
 message = [ sys.argv if '-m' in sys.argv else False][0]
 delete_phone_number = [ sys.argv if '-remove' in sys.argv else False][0]
+send_files = [ sys.argv if '-send' in sys.argv else False][0]
 
 # check the for .ana_variables file in the home directory
 def create_varibale_file():    
@@ -29,26 +30,28 @@ def create_varibale_file():
             f.write('phone_number='+os.environ['phone_number'])
     return varibale_file
 
-varibale_file = create_varibale_file()
-if varibale_file and os.environ.get('phone_number'):
-    pass
-else:
-    print(Fore.RED + "phone number not found in environment variables $ export phone_number=""0000000""\n" +"Add this to your .bash_profile or .bashrc file or path for permanent changes not just session")
-    os.remove(varibale_file)
-    sys.exit()
+# check the os if linux or mac
+if sys.platform.lower() == 'darwin':
+    varibale_file = create_varibale_file()
+    if varibale_file and os.environ.get('phone_number'):
+        pass
+    else:
+        print(Fore.RED + "phone number not found in environment variables $ export phone_number=""0000000""\n" +"Add this to your .bash_profile or .bashrc file or path for permanent changes not just session")
+        os.remove(varibale_file)
+        sys.exit()
 
-    
-if delete_phone_number:
-    os.unsetenv('phone_number')
-    os.remove(varibale_file)
-    try:
-        ask_ = input("close the terminal or restart the shell to see the changes. close the terminal? y/n: ")
-        if ask_ == 'y':
-            os.system('killall Terminal')
-    except:
-        # used for windows and linux systems... not tested
-        raise Exception ("close the terminal or restart the shell to see the changes")
-    sys.exit()
+
+    if delete_phone_number:
+        os.unsetenv('phone_number')
+        os.remove(varibale_file)
+        try:
+            ask_ = input("close the terminal or restart the shell to see the changes. close the terminal? y/n: ")
+            if ask_ == 'y':
+                os.system('killall Terminal')
+        except:
+            # used for windows and linux systems... not tested
+            raise Exception ("close the terminal or restart the shell to see the changes")
+        sys.exit()
     
 
 def launchctl_setup():
@@ -73,12 +76,53 @@ elif message:
     notification().relay_message([message[2] if message else ""],endpoints='imessage',port=5020,local_server=True)
 
     
+if send_files and send_files[1] == '-send':    
+    if send_files[send_files.index('-r') + 1]:
+        remote = send_files[send_files.index('-r') + 1]
+    else:
+        remote = None
+        
+    if send_files[send_files.index('-local') + 1]:
+        local = send_files[send_files.index('-local') + 1]
+    else:
+        local = None
+    hostname = send_files[send_files.index('-device') + 1]    
+    send_data(hostname=f"{send_files[send_files.index('-device') + 1]}",remote=remote,local=local)    
+            
+    
+# print(device_name,send_files[send_files.index('-f') + 1])
+
+    # if device_name == 'admin':
+        
+    #     send_data(name=f"{device_name}",remote="/Users/admin/Desktop/fucked")
+    # elif device_name == 'linux':
+        
+    #     send_data(name=f"{device_name}",remote="projects/library_tools")
 
 
 
+
+help_meun = """ 
+reset_server = [ sys.argv if '-reset' in sys.argv else False][0]
+message = [ sys.argv if '-m' in sys.argv else False][0]
+delete_phone_number = [ sys.argv if '-remove' in sys.argv else False][0]
+
+send_files = [ sys.argv if '-send' in sys.argv else False][0]
+    example : ana -send -r /home/ubuntu -local  ana  -device "ubuntu" 
+
+
+"""
 
 
 def _entry_point():
     """cli entrypoint
     """
-    pass
+    flags_provided = False
+    for i in sys.argv:
+        if i.startswith("-"):
+            flags_provided = True
+            break
+    if flags_provided:
+        pass
+    elif flags_provided == False:
+        print(help_meun)

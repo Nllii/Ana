@@ -17,7 +17,7 @@ init(autoreset=True)
 __all__ = ['log_exception','notification']
 
 
-VERBOSE = [ sys.argv if '-v' in sys.argv else False][0]
+VERBOSE = [True if '-v' in sys.argv else False][0]
 ANA_ROOT = os.path.abspath(os.path.dirname(__file__))
 UNIXSCRIPT_ROOT = os.path.abspath(os.path.dirname(__file__) + '/unix-scripts')
 
@@ -57,32 +57,6 @@ class find_servers():
     
 
 
-class send_data(find_servers):
-    """using rsync  to send files."""
-    def __init__(self,name,remote=None,local=None):
-        self.local_path = local
-        self.remote_path = remote
-        # self.name = device_name or name
-        super().__init__()
-        self._send_()
-    
-    def _send_(self):   
-        # use rsync to send files
-        if self.local_path is None:
-            self.local_path = os.getcwd()
-        if self.remote_path is None:
-            raise Exception ("- specify a remote path.")        
-        for server in self.servers():
-            print("Sending files to:", server)
-            print(self.remote_path)
-            files_ = subprocess.Popen(['rsync', '-avz', self.local_path, f'{self.name}@{server}' + ":" + self.remote_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print(files_.stdout.read().decode('utf-8'))
-
-
-
-
-
-
 
 
 class notification(object):
@@ -98,9 +72,14 @@ class notification(object):
         subprocess.call(['bash', self.script, self.f_args,self.arg_options])
    
 
-    def send_message(self,message):
-        if VERBOSE:
-            print(Fore.GREEN + message + Fore.RESET)
+    def send_message(self,message=None,disable_verbose=False):
+        if disable_verbose is False:
+            pass
+        elif VERBOSE:
+            print(Fore.RED + f"Sending message to {self.number} ({message})" + Fore.RESET)
+        else:
+            pass
+
         if message:
             # escaped_message = re.sub('"', '\\"', message)  # Escape double quotes in message
             command = ['osascript', '-e', f'tell application "Messages" to send "{message}" to buddy "{self.number}" of (service 1 whose service type is iMessage)']        
@@ -190,7 +169,41 @@ class notification(object):
         
         
         
+
+class send_data(find_servers):
+    """using rsync  to send files."""
+    def __init__(self,hostname,remote=None,local=None):
+        self.local_path = local
+        self.remote_path = remote
+        self.name = hostname or None
+        super().__init__()
+        self._send_()
+    
+    def _send_(self):   
+        # use rsync to send files
+        # if self.local_path is None or self.local_path == '.':
+        #     self.local_path = os.getcwd()
+        if self.remote_path is None:
+            raise Exception ("- specify a remote path.")
+        if self.name is None:
+            raise Exception ("- specify a hostname.")
+        print(self.local_path)
         
+        for server in self.servers():
+            try:
+                notification().send_message(f" sending files to  server {server}   {self.name} from {self.local_path} to {self.remote_path}",disable_verbose=True)
+                # rsync -avz .server_url.txt ubuntu@172.20.10.7:/home/ubuntu
+                files_ = subprocess.Popen(['rsync', '-avz', self.local_path, f'{self.name}@{server}:{self.remote_path}'], stdout=subprocess.PIPE)
+                print(files_.stdout.read().decode('utf-8'))
+                
+            except Exception as e:
+                # print(e)
+                continue
+
+
+
+
+
 
 
 
