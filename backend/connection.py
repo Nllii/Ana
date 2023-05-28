@@ -13,22 +13,15 @@ import sys
 project_directory = os.path.abspath(os.path.dirname(__file__))
 parent_directory = os.path.dirname(project_directory)
 sys.path.append(parent_directory)
-
-
-                    
-                                
-    
-
-
-
+found_devices = list()
 
 class cluster(object):
     def __init__(self,inventory=None):
         self.ssh_key_path = os.path.expanduser("~/.ssh/id_rsa.pub")
         self.file = inventory
         self.project_dir = parent_directory
-        # self.found_mothership = self.inventory(file=inventory,username='mothership')
-
+        self.hosts = None
+        
 
     def get_mac_address(self):
         if sys.platform == "darwin":
@@ -50,9 +43,9 @@ class cluster(object):
         return mac_address
 
 
-    #TODO: save the ip address of the server to file
+    #TODO: save the ip address of the server to file nvm... just request it everytime
     def local_address(self):
-        if platform.system() == "Linux":
+        if platform.system().lower() == "linux":
             result = subprocess.run("ip addr show | grep 'inet ' | grep -v '127.0.0.1' | head -1 | awk '{print $2}' | cut -f1 -d'/'", shell=True, capture_output=True, text=True)
             ip = result.stdout.strip()
         elif platform.system() == "Darwin":
@@ -70,7 +63,7 @@ class cluster(object):
         server_name = random.choice(word_list)    
         return server_name
 
-
+    # @property #TODO: enable this property or remove it in the future
     def scan_network(self,get_host='ubuntu',host_range=False):
         """scan the network and find the ip address of the server
         *  get_host as an argument to find the ip address of the server names : ubuntu is the default host name
@@ -80,7 +73,7 @@ class cluster(object):
         except Exception as e:
             print('Nmap not found', sys.exc_info()[0])
             if platform.system() == "Linux":
-                print("Please install nmap using 'sudo apt-get install nmap'")
+                print("Please install nmap using 'sudo apt-get install nmap -y'")
             elif platform.system() == "Darwin":
                 print("Please install nmap using 'brew install nmap'")
                 sys.exit(1)
@@ -88,17 +81,12 @@ class cluster(object):
                 print("Please install nmap")
                 sys.exit(1)
         
-                
-        # nm.scan(hosts=host_range, arguments='-n -sP -PE -PA21,23,80,3389')
         if host_range == True:
             nm.scan(hosts=f'{self.local_address()}/24', arguments='-n -sP -PE -PA21,23,80,3389',sudo=True)
         else:
-            # remove the last octet of the ip address and scan the network
-            # nm.scan(hosts=f'{self.local_address()[:-1]}0/24', arguments='-n -sP -PE -PA21,23,80,3389')
             nm.scan(hosts=f'{self.local_address()[:-1]}0-10', arguments='-n -sP -PE -PA21,23,80,3389',sudo=True)
             
         hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
-        found_devices = list()
         for host, status in hosts_list:
             try:
                 found_devices.append(nm[host])
@@ -106,10 +94,16 @@ class cluster(object):
                 continue
         if found_devices == {} or found_devices == []:
             print(Fore.RED + f"No server found on the network with the name {get_host} and the host range {host_range}" + Fore.RESET)
-            return False
+            if host_range == False:
+                print(Fore.RED + f"Trying again.." + Fore.RESET)
+                self.scan_network(get_host=get_host,host_range=True)
 
+            else:
+                print(Fore.RED + f"could not figure out the host...  check the host range and manually set it" + Fore.RESET)
+                sys.exit(1)
         return found_devices
-    
+    '''
+    TODO: OLD CODE from ansible library. Delete this code in the future. 
     def save_inventory(self,inventory_file, group_name, host_vars):
         with open(inventory_file, 'a') as f:
             f.write(f'\n[{group_name}:children]\n')
@@ -178,25 +172,6 @@ class cluster(object):
             host_vars['group_name'] = group_name
             self.save_inventory(inventory_file, group_name, host_vars)            
             return host_vars
-
-
-
-    def clusters(self,hosts='ubuntu'):
-        """
-        This function will search for the following servers on the network:
-        - Defualt hosts is called ubuntu
-        - Mothership Server (Main Master Server) manually configure this server: 
-        - Master Server (Master Server)
-        - Slave Server (Slave Server)
-        """
-        print(Fore.GREEN + "Searching for the mothership server on the network" + Fore.RESET)
-
-        # print(extras.output(f"Searching for the mothership server on the network",color='red'))
-        ping = self.scan_network(get_host=hosts)
-        if ping == False:
-            return False
-    
-    
     def inventory(self,ansible_host,ansible_user='ubuntu',password='ubuntu',groups=None):   
         if groups == None:
             return False
@@ -205,13 +180,37 @@ class cluster(object):
         host_var = self.get_host_vars(self.file, groups, ansible_host, ansible_user, password)
         return host_var
         
+        '''
 
 
+    def perform_scans(self,hosts='ubuntu',verbose=False):
+        """
+        This function will search for the following servers on the network and display them
+        - Defualt hosts is called ubuntu
+        - Master Server (Master Server)
+        - Slave Server (Slave Server)
+        """
+        print(Fore.GREEN + "Searching devices on the network on the network" + Fore.RESET)
+        ping = self.scan_network(get_host=hosts)
+        if ping == False:
+            return False
+        else:
+            if verbose:
+                print(Fore.GREEN + "Found the following devices on the network" + Fore.RESET)
+        for device in ping:
+            print(Fore.GREEN + f"Device: {device['hostname']} IP Address: {device['addresses']['ipv4']}" + Fore.RESET)
+        return ping
+
+    
+    
+
+    # THIS IS AN IMPORTANT FUNCTION
     def config_ssh_keygen(self,hostname_address,username,password):
         """Add SSH key to remote server to allow passwordless login"""
         # Generate an SSH key pair on the local machine
         ssh_keygen_cmd =  ['ssh-keygen', '-t', 'rsa', '-N', '', '-f', f'{os.path.expanduser("~")}/.ssh/id_rsa']
         # subprocess.run(ssh_keygen_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # check if password is set or list and if not set then generate ssh key
         subprocess.run(ssh_keygen_cmd)
         # Copy the public key to the remote server
         public_key_path = os.path.expanduser("~/.ssh/id_rsa.pub")
@@ -223,7 +222,7 @@ class cluster(object):
         try:
             ssh.connect(hostname=hostname_address, username=username, password=password,timeout=10)
         except:
-            print(f"Unable to connect to remote server. Please check the IP address {hostname_address} and try again.")
+            print(f"Unable to connect to remote server. Please check the IP address {hostname_address} {username} {password} and try again.")
             return hostname_address
         
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(f'mkdir -p ~/.ssh && echo "{public_key}" >> ~/.ssh/authorized_keys')
@@ -238,30 +237,4 @@ class cluster(object):
         ssh_stdin.channel.recv_exit_status()
         ssh.close()
         print("SSH key added and password-based authentication disabled on remote server.")
-
-    # def run_playbook(self,inventory,playbook,**kwargs):
-    #     if playbook:
-    #         if os.path.exists(f'{playbook}'):
-    #             subprocess.run(['ansible-playbook', '-i', f'{inventory}', f'{playbook}', '-v'])
-    #             return True
-    #         else:
-    #             print(extras.output(f"Playbook {playbook} not found, provide the full path searching...",color='red'))
-    #             try:
-    #                 print(extras.output(f"Searching for {playbook} in {self.project_dir}",color='red'))
-    #                 files = os.listdir(f'{self.project_dir}/playbooks')
-    #                 if playbook in files:
-    #                     playbook = f'{self.project_dir}/playbooks/{playbook}'
-    #                     print(extras.output(f"Playbook {playbook} found",color='yellow',background=True))
-    #                 subprocess.run(['ansible-playbook', '-i', f'{inventory}', f'{playbook}', '-v'])
-                    
-    #                 return True
-    #             except:
-    #                 return False
-    #     else:
-    #         raise Exception("Developer note: I have no idea how you got to this point: YOU ARE ON YOUR OWN!!!")
-        
-        
-        
-            
-    
-
+        return True

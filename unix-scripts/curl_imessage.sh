@@ -1,9 +1,9 @@
 #!/bin/bash
-
+#TODO:
 # Set the server URL and DNS IP address
 SERVER_URL=$(cat $(pwd)/.server_url.txt | head -n 1)
 DNS_IP="8.8.8.8"
-LOG_FILE=$(pwd)/.internet_connection.log
+LOG_FILE=$(pwd)/.imessage.log
 
 alert(){
     alert_message=$@
@@ -15,6 +15,7 @@ alert(){
     RESPONSE_BODY="${RESPONSE:0:${#RESPONSE}-3}"
     if [ "$HTTP_STATUS" -eq 200 ]; then
         # Command executed successfully. Output:
+
         echo "message successfully $alert_message" >> $LOG_FILE
     else
         # Error executing command. Server response:

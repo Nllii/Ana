@@ -6,18 +6,13 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # Add the parent directory to the Python module search path
 sys.path.append(parent_dir)
-
 from library import notification
-
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
     return "{ code: ''}, { message: ''}"
-
-
-
 
 
 @app.route('/imessage', methods=['POST'])
@@ -46,7 +41,5 @@ def execute_code():
 
 
 # Start the server.
-
-if __name__ == '__main__':
-    
+if __name__ == '__main__':    
     app.run(host='0.0.0.0', port=5020, debug=False)

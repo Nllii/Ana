@@ -10,7 +10,7 @@ __version__ = '0.0.1'
 setup(
     name='Ana',
     version=__version__,
-    description='Ana is an assistant for managing raspberry pi and other devices using [Linux]',
+    description='Ana is an assistant for managing raspberry pi and other devices on [Linux] ubuntu supporter',
     long_description=long_description,
     keywords='assistant', 
     author='Nii Golightly',

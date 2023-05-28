@@ -7,12 +7,10 @@ set -e
 set -x
 
 die() {
-
     echo $@
     exit 1
 }
 python_bin_path=$(which python || which python3 || die "Cannot find Python binary")
-
 directory=$(pwd)
 if [ $# -eq 0 ]
   then

@@ -7,15 +7,12 @@ set -u  # Check for undefined variables
 set -e
 set -x
 
+# same as the python version
 s_number() {
-
 cat <<EOF > $HOME/.ana_variables
+phone_number=$@
 # created by ana $(date) $(whoami) $(pwd)
-
-# export phone_number=$@
-
 EOF
-
 }
 
 "${@:1}" "${@:3}"
