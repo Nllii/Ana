@@ -2,7 +2,7 @@
 uses imessage.
 
 """
-from library import VERBOSE, notification,network_management,archive
+from library import VERBOSE, notification,network_management,archive,find_servers
 import os
 import sys
 from colorama import Fore, Back, Style, init
@@ -16,6 +16,8 @@ delete_phone_number = [ sys.argv if '-remove' in sys.argv else False][0]
 send_files = [ sys.argv if '-send' in sys.argv else False][0]
 UNIXSCRIPT_ROOT = os.path.abspath(os.path.dirname(__file__) + '/unix-scripts')
 DEVICE_SETUP = [ sys.argv if '-setup' in sys.argv else False][0]
+SCAN_NETWORK = [ sys.argv if '-scan' in sys.argv else False][0]
+
 
 # check the for .ana_variables file in the home directory
 def create_varibale_file():    
@@ -72,6 +74,7 @@ def test_notification():
     if reponse:
         notification().send_media("send_media function is deprecated. use send_alert instead.")
 
+
 if reset_server and reset_server[1] == '-reset':  # reset server. 
     print("resetting server")  
     test_notification()
@@ -80,6 +83,8 @@ elif message:
     notification().relay_message([message[2] if message else ""],endpoints='imessage',port=5020,local_server=True)
 
     
+
+
 if send_files and send_files[1] == '-send':    
     if send_files[send_files.index('-r') + 1]:
         remote = send_files[send_files.index('-r') + 1]
@@ -160,9 +165,13 @@ if DEVICE_SETUP and DEVICE_SETUP[1] == '-setup':
         elif '-clean' in DEVICE_SETUP:
             attachments.close_session()
             print('cleaning up session')
-            
-        
-      
+if '-scan' in sys.argv:
+    print("scanning network")
+    print(find_servers().servers())
+    sys.exit()
+    # subprocess.call(['bash',UNIXSCRIPT_ROOT+'/setup+linux-devices.sh' ,'install_all'],shell=True,executable='/bin/bash',stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    # sys.exit()     
+
 
 
 #TODO: collect all the todo and write the code.

@@ -3,10 +3,10 @@ __pycache__
 .account.ini
 .old_ana
 # settings.py
-.server_url.txt
 .internet_connection.log
 debug.log
 *.plist
 function_test.py
 ana_archive
 attachments.py_null
+.*
