@@ -1,6 +1,6 @@
 import os
 from setuptools import setup
-import configparser
+# import configparser
 directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(directory, 'README.md'), encoding='utf-8') as f:
   long_description = f.read()
